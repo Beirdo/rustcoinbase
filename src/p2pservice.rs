@@ -11,12 +11,14 @@ pub trait P2PService {
     async fn addr(request: P2PMap) -> P2PMap;
     async fn alert(request: P2PMap) -> P2PMap;
     async fn block(request: P2PMap) -> P2PMap;
+    async fn checkorder(request: P2PMap) -> P2PMap;
     async fn checkpoint(request: P2PMap) -> P2PMap;
     async fn getaddr(request: P2PMap) -> P2PMap;
     async fn getblocks(request: P2PMap) -> P2PMap;
     async fn getdata(request: P2PMap) -> P2PMap;
     async fn headers(request: P2PMap) -> P2PMap;
     async fn inv(request: P2PMap) -> P2PMap;
+    async fn mempool(request: P2PMap) -> P2PMap;
     async fn ping(request: P2PMap) -> P2PMap;
     async fn pong(request: P2PMap) -> P2PMap;
     async fn reply(request: P2PMap) -> P2PMap;

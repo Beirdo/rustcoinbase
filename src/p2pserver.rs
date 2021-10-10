@@ -52,6 +52,14 @@ impl P2PService for P2PServer {
         response
     }
 
+    async fn checkorder(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("checkorder request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
     async fn checkpoint(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("checkpoint request: {:?} from {}", request, self.0);
         println!("{}", message);
@@ -86,6 +94,14 @@ impl P2PService for P2PServer {
 
     async fn headers(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("headers request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn mempool(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("mempool request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
         response.insert(String::from("text"), String::from(message));
