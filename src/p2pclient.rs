@@ -10,6 +10,7 @@ use std::{net::SocketAddr, time::Duration};
 use tarpc::{client, context};
 use tokio_serde::formats::*;
 use tokio::time::sleep;
+use serde_cbor::Value;
 
 #[derive(Clap)]
 struct Flags {
@@ -30,7 +31,10 @@ async fn main() -> anyhow::Result<()> {
     let client = P2PServiceClient::new(client::Config::default(), transport.await?).spawn();
 
     let mut request = P2PMap::new();
-    request.insert(String::from("biteme"), String::from("dude"));
+    request.insert(Value::from(String::from("biteme")),
+                   Value::from(String::from("dude")));
+    request.insert(Value::from(String::from("eatme")),
+                   Value::from(30));
     let version = client.version(context::current(), request).await?;
 
     tracing::info!("{:?}", version);

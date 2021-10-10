@@ -1,8 +1,9 @@
 use std::env;
 use tracing_subscriber::{fmt::format::FmtSpan, prelude::*};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
+use serde_cbor::Value;
 
-pub type P2PMap = HashMap<String, String>;
+pub type P2PMap = BTreeMap<Value, Value>;
 
 /// This is the service definition. It looks a lot like a trait definition.
 /// It defines one RPC, hello, which takes one arg, name, and returns a String.

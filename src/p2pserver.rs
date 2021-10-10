@@ -13,6 +13,7 @@ use tarpc::{
     server::{self, incoming::Incoming, Channel},
 };
 use tokio_serde::formats::*;
+use serde_cbor::Value;
 
 #[derive(Clap)]
 struct Flags {
@@ -32,7 +33,8 @@ impl P2PService for P2PServer {
         let message = format!("addr request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -40,7 +42,8 @@ impl P2PService for P2PServer {
         let message = format!("alert request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -48,7 +51,8 @@ impl P2PService for P2PServer {
         let message = format!("block request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -56,7 +60,8 @@ impl P2PService for P2PServer {
         let message = format!("checkorder request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -64,7 +69,8 @@ impl P2PService for P2PServer {
         let message = format!("checkpoint request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -72,7 +78,8 @@ impl P2PService for P2PServer {
         let message = format!("getaddr request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -80,7 +87,8 @@ impl P2PService for P2PServer {
         let message = format!("getblocks request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -88,7 +96,8 @@ impl P2PService for P2PServer {
         let message = format!("getdata request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -96,15 +105,8 @@ impl P2PService for P2PServer {
         let message = format!("headers request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
-        response
-    }
-
-    async fn mempool(self, _: context::Context, request: P2PMap) -> P2PMap {
-        let message = format!("mempool request: {:?} from {}", request, self.0);
-        println!("{}", message);
-        let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -112,7 +114,17 @@ impl P2PService for P2PServer {
         let message = format!("inv request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
+        response
+    }
+
+    async fn mempool(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("mempool request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -120,7 +132,8 @@ impl P2PService for P2PServer {
         let message = format!("ping request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -128,7 +141,8 @@ impl P2PService for P2PServer {
         let message = format!("pong request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -136,7 +150,8 @@ impl P2PService for P2PServer {
         let message = format!("reply request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -144,7 +159,8 @@ impl P2PService for P2PServer {
         let message = format!("tx request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -152,7 +168,8 @@ impl P2PService for P2PServer {
         let message = format!("version request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 
@@ -160,7 +177,8 @@ impl P2PService for P2PServer {
         let message = format!("verack request: {:?} from {}", request, self.0);
         println!("{}", message);
         let mut response = P2PMap::new();
-        response.insert(String::from("text"), String::from(message));
+        response.insert(Value::from(String::from("text")),
+                        Value::from(String::from(message)));
         response
     }
 }
