@@ -35,7 +35,7 @@ async fn main() -> anyhow::Result<()> {
                    Value::from(String::from("dude")));
     request.insert(Value::from(String::from("eatme")),
                    Value::from(30));
-    let version = client.version(context::current(), request).await?;
+    let version = client.addr(context::current(), request).await?;
 
     tracing::info!("{:?}", version);
     println!("{:?}", version);
