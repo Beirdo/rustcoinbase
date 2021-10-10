@@ -6,22 +6,13 @@
 
 use clap::Clap;
 use futures::{future, prelude::*};
-use rand::{
-    distributions::{Distribution, Uniform},
-    thread_rng,
-};
 use p2pservice::*;
-use std::{
-    net::{IpAddr, Ipv4Addr, SocketAddr},
-    time::Duration,
-};
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use tarpc::{
     context,
     server::{self, incoming::Incoming, Channel},
 };
 use tokio_serde::formats::*;
-//use tokio::time;
-use std::collections::HashMap;
 
 #[derive(Clap)]
 struct Flags {
@@ -37,10 +28,122 @@ struct P2PServer(SocketAddr);
 
 #[tarpc::server]
 impl P2PService for P2PServer {
-    async fn version(self, _: context::Context, request: HashMap<String, String>) -> HashMap<String, String> {
-        let message = format!("Version Request: {:?} from {}", request, self.0);
+    async fn addr(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("addr request: {:?} from {}", request, self.0);
         println!("{}", message);
-        let mut response = HashMap::new();
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn alert(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("alert request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn block(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("block request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn checkpoint(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("checkpoint request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn getaddr(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("getaddr request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn getblocks(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("getblocks request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn getdata(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("getdata request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn headers(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("headers request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn inv(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("inv request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn ping(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("ping request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn pong(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("pong request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn reply(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("reply request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn tx(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("tx request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn version(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("version request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
+        response.insert(String::from("text"), String::from(message));
+        response
+    }
+
+    async fn verack(self, _: context::Context, request: P2PMap) -> P2PMap {
+        let message = format!("verack request: {:?} from {}", request, self.0);
+        println!("{}", message);
+        let mut response = P2PMap::new();
         response.insert(String::from("text"), String::from(message));
         response
     }

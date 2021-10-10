@@ -1,22 +1,28 @@
-// Copyright 2018 Google LLC
-//
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file or at
-// https://opensource.org/licenses/MIT.
-
-use serde_derive::{Deserialize, Serialize};
-//use std::error::Error;
-//use std::fs::File;
-use std::net::IpAddr;
 use std::env;
 use tracing_subscriber::{fmt::format::FmtSpan, prelude::*};
 use std::collections::HashMap;
+
+pub type P2PMap = HashMap<String, String>;
 
 /// This is the service definition. It looks a lot like a trait definition.
 /// It defines one RPC, hello, which takes one arg, name, and returns a String.
 #[tarpc::service]
 pub trait P2PService {
-    async fn version(request: HashMap<String, String>) -> HashMap<String, String>;
+    async fn addr(request: P2PMap) -> P2PMap;
+    async fn alert(request: P2PMap) -> P2PMap;
+    async fn block(request: P2PMap) -> P2PMap;
+    async fn checkpoint(request: P2PMap) -> P2PMap;
+    async fn getaddr(request: P2PMap) -> P2PMap;
+    async fn getblocks(request: P2PMap) -> P2PMap;
+    async fn getdata(request: P2PMap) -> P2PMap;
+    async fn headers(request: P2PMap) -> P2PMap;
+    async fn inv(request: P2PMap) -> P2PMap;
+    async fn ping(request: P2PMap) -> P2PMap;
+    async fn pong(request: P2PMap) -> P2PMap;
+    async fn reply(request: P2PMap) -> P2PMap;
+    async fn tx(request: P2PMap) -> P2PMap;
+    async fn version(request: P2PMap) -> P2PMap;
+    async fn verack(request: P2PMap) -> P2PMap;
 }
 
 /// Initializes an OpenTelemetry tracing subscriber with a Jaeger backend.

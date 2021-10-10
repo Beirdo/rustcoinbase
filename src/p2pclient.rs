@@ -10,17 +10,12 @@ use std::{net::SocketAddr, time::Duration};
 use tarpc::{client, context};
 use tokio_serde::formats::*;
 use tokio::time::sleep;
-use tracing::Instrument;
-use std::collections::HashMap;
 
 #[derive(Clap)]
 struct Flags {
     /// Sets the server address to connect to.
     #[clap(long)]
     server_addr: SocketAddr,
-    /// Sets the name to say hello to.
-    #[clap(long)]
-    name: String,
 }
 
 #[tokio::main]
@@ -34,7 +29,7 @@ async fn main() -> anyhow::Result<()> {
     // config and any Transport as input.
     let client = P2PServiceClient::new(client::Config::default(), transport.await?).spawn();
 
-    let mut request = HashMap::new();
+    let mut request = P2PMap::new();
     request.insert(String::from("biteme"), String::from("dude"));
     let version = client.version(context::current(), request).await?;
 
