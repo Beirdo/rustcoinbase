@@ -1,12 +1,6 @@
-// Copyright 2018 Google LLC
-//
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file or at
-// https://opensource.org/licenses/MIT.
-
 use clap::Clap;
 use futures::{future, prelude::*};
-use p2pservice::*;
+use rustcoinbase::rustcoinlib::p2pservice::*;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use tarpc::{
     context,
@@ -22,8 +16,6 @@ struct Flags {
     port: u16,
 }
 
-// This is the type that implements the generated World trait. It is the business logic
-// and is used to start the server.
 #[derive(Clone)]
 struct P2PServer(SocketAddr);
 
@@ -184,13 +176,13 @@ impl P2PService for P2PServer {
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+pub async fn start_p2pserver() -> anyhow::Result<()> {
     let flags = Flags::parse();
     init_tracing("Tarpc Example Server")?;
 
     let server_addr = (IpAddr::V4(Ipv4Addr::LOCALHOST), flags.port);
     tracing::info!("{:?}", server_addr);
-    println!("{:?}", server_addr);
+    println!("Starting P2P Service at {:?}", server_addr);
 
     // JSON transport is provided by the json_transport tarpc module. It makes it easy
     // to start up a serde-powered json serialization strategy over TCP.

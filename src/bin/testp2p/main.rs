@@ -5,7 +5,7 @@
 // https://opensource.org/licenses/MIT.
 
 use clap::Clap;
-use p2pservice::*;
+use rustcoinbase::rustcoinlib::p2pservice::*;
 use std::{net::SocketAddr, time::Duration};
 use tarpc::{client, context};
 use tokio_serde::formats::*;
