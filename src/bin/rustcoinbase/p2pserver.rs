@@ -1,8 +1,9 @@
+use log::*;
 use futures::{future, prelude::*};
 use rustcoinbase::rustcoinlib::p2pservice::*;
 use rustcoinbase::rustcoinlib::peerdb::*;
 use rustcoinbase::rustcoinlib::settings::*;
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use std::net::SocketAddr;
 use tarpc::{
     context,
     server::{self, incoming::Incoming, Channel},
@@ -23,10 +24,9 @@ impl P2PService for P2PServer {
         let value: PeerDBValue = serde_json::json!({
             "test": "blah"
         });
-        peerdb.write(&key, value);
-        let result = peerdb.read(&key).expect("Couldn't read back from db");
-        println!("{}", message);
-        println!("{:?}", result);
+        peerdb.write(&key, value).unwrap();
+        //let result = peerdb.read(&key).expect("Couldn't read back from db");
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -35,7 +35,7 @@ impl P2PService for P2PServer {
 
     async fn alert(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("alert request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -44,7 +44,7 @@ impl P2PService for P2PServer {
 
     async fn block(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("block request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -53,7 +53,7 @@ impl P2PService for P2PServer {
 
     async fn checkorder(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("checkorder request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -62,7 +62,7 @@ impl P2PService for P2PServer {
 
     async fn checkpoint(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("checkpoint request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -71,7 +71,7 @@ impl P2PService for P2PServer {
 
     async fn getaddr(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("getaddr request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -80,7 +80,7 @@ impl P2PService for P2PServer {
 
     async fn getblocks(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("getblocks request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -89,7 +89,7 @@ impl P2PService for P2PServer {
 
     async fn getdata(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("getdata request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -98,7 +98,7 @@ impl P2PService for P2PServer {
 
     async fn headers(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("headers request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -107,7 +107,7 @@ impl P2PService for P2PServer {
 
     async fn inv(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("inv request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -116,7 +116,7 @@ impl P2PService for P2PServer {
 
     async fn mempool(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("mempool request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -125,7 +125,7 @@ impl P2PService for P2PServer {
 
     async fn ping(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("ping request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -134,7 +134,7 @@ impl P2PService for P2PServer {
 
     async fn pong(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("pong request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -143,7 +143,7 @@ impl P2PService for P2PServer {
 
     async fn reply(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("reply request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -152,7 +152,7 @@ impl P2PService for P2PServer {
 
     async fn tx(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("tx request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -161,7 +161,7 @@ impl P2PService for P2PServer {
 
     async fn version(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("version request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -170,7 +170,7 @@ impl P2PService for P2PServer {
 
     async fn verack(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("verack request: {:?} from {}", request, self.0);
-        println!("{}", message);
+        info!("{}", message);
         let mut response = P2PMap::new();
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
@@ -183,8 +183,7 @@ pub async fn start_p2pserver(settings: &Settings, peerdb: PeerDatabase) -> anyho
     let server_ip = settings.p2p.bind;
     let server_port = settings.p2p.port;
     let server_addr = (server_ip, server_port);
-    tracing::info!("{:?}", server_addr);
-    println!("Starting P2P Service at {:?}", server_addr);
+    info!("Starting P2P Service at {:?}", server_addr);
 
     // JSON transport is provided by the json_transport tarpc module. It makes it easy
     // to start up a serde-powered json serialization strategy over TCP.

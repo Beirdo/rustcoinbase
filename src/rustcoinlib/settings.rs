@@ -7,11 +7,13 @@ use serde_derive::Deserialize;
 use std::path::Path;
 use std::fs;
 use std::net::IpAddr;
+use std::sync::mpsc;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Global {
     pub config_dir: String,
     pub data_dir: String,
+    pub log_file: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -28,7 +30,8 @@ pub struct Settings {
 }
 
 impl Settings {
-    pub fn new(appname: &str) -> Result<Self, ConfigError> {
+    pub fn new(appname: &str, logqueue: mpsc::Sender<String>) -> Result<Self, ConfigError> {
+        logqueue.send(format!("Loading settings for {}", appname)).unwrap();
         let mut s = Config::default();
         
         let config_dir = if let Some(proj_dirs) = ProjectDirs::from("net", "MyCryptoCoins", appname) {
@@ -53,18 +56,21 @@ impl Settings {
             String::from("data")
         };
 
+	let log_file: String = String::from(Path::new(&data_dir).join(format!("{}.log", appname)).to_str().unwrap());
+        s.set("global.log_file", log_file)?;
+
 	// Create defaults - this sucks
         s.set("debug", false)?;
         s.set("p2p.port", 9911)?;
         s.set("p2p.bind", "0.0.0.0")?;
 
 	if !Path::new(&config_dir).is_dir() {
-            println!("Dir doesn't exist: {}", config_dir);
+            logqueue.send(format!("Dir doesn't exist: {}", config_dir)).unwrap();
             fs::create_dir_all(&config_dir).expect("Could not create config dir");
         }
 
 	if !Path::new(&data_dir).is_dir() {
-            println!("Dir doesn't exist: {}", data_dir);
+            logqueue.send(format!("Dir doesn't exist: {}", data_dir)).unwrap();
             fs::create_dir_all(&data_dir).expect("Could not create data dir");
         }
 
