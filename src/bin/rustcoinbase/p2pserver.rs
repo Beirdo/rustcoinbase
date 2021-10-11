@@ -24,7 +24,7 @@ impl P2PService for P2PServer {
         let value: PeerDBValue = serde_json::json!({
             "test": "blah"
         });
-        peerdb.write(&key, value).unwrap();
+        peerdb.write_raw(&key, value).unwrap();
         //let result = peerdb.read(&key).expect("Couldn't read back from db");
         info!("{}", message);
         let mut response = P2PMap::new();
@@ -162,7 +162,43 @@ impl P2PService for P2PServer {
     async fn version(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("version request: {:?} from {}", request, self.0);
         info!("{}", message);
+
+        let request: P2PVersionRequest = P2PVersionRequest::from(request);
+        info!("{:?}", request);
+
+        let mut peerdb = self.1;
+        let key = String::from(self.0.to_string());
+        let mut peer = peerdb.read(&key).expect("Couldn't read back from db");
+        info!("{:?}", peer);
+
         let mut response = P2PMap::new();
+
+	if peer.version != 0 {
+            peer.misbehaving += 1;
+            return response;
+        }
+
+	peer.version = request.version;
+        peer.services = request.services;
+        let time = request.time;
+        let addr_me = request.addr_me;
+
+        info!("Peer: {:?}", peer);
+
+	if peer.version < 1000 {
+            error!("Peer {:?} using obsolete version {}; disconnecting", self.0, peer.version);
+            peer.disconnect = true;
+            peerdb.write(&key, peer).unwrap();
+            return response;
+        }
+
+        let nonce = request.nonce;
+        if nonce == 1000 && nonce > 1 {
+            error!("Connected to self at {}, disconnecting", self.0);
+            peer.disconnect = true;
+            return response;
+        }
+        
         response.insert(Value::from(String::from("text")),
                         Value::from(String::from(message)));
         response

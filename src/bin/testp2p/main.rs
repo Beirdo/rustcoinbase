@@ -22,7 +22,6 @@ struct Flags {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let flags = Flags::parse();
-    init_tracing("Tarpc Example Client")?;
 
     let transport = tarpc::serde_transport::tcp::connect(flags.server_addr, Cbor::default);
 
@@ -31,18 +30,21 @@ async fn main() -> anyhow::Result<()> {
     let client = P2PServiceClient::new(client::Config::default(), transport.await?).spawn();
 
     let mut request = P2PMap::new();
-    request.insert(Value::from(String::from("biteme")),
-                   Value::from(String::from("dude")));
-    request.insert(Value::from(String::from("eatme")),
-                   Value::from(30));
-    let version = client.addr(context::current(), request).await?;
+    request.insert(Value::from(String::from("version")),
+                   Value::from(100));
+    request.insert(Value::from(String::from("services")),
+                   Value::from(0));
+    request.insert(Value::from(String::from("time")),
+                   Value::from(1000));
+    request.insert(Value::from(String::from("addr_me")),
+                   Value::from(String::from(flags.server_addr.to_string())));
+    let version = client.version(context::current(), request).await?;
 
     tracing::info!("{:?}", version);
     println!("{:?}", version);
 
     // Let the background span processor finish.
     sleep(Duration::from_micros(1000000)).await;
-    opentelemetry::global::shutdown_tracer_provider();
 
     Ok(())
 }

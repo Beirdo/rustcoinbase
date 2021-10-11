@@ -1,12 +1,10 @@
-use std::env;
-use tracing_subscriber::{fmt::format::FmtSpan, prelude::*};
 use std::collections::BTreeMap;
 use serde_cbor::Value;
+use serde_cbor::{to_vec, from_slice};
+use serde_derive::{Serialize, Deserialize};
 
 pub type P2PMap = BTreeMap<Value, Value>;
 
-/// This is the service definition. It looks a lot like a trait definition.
-/// It defines one RPC, hello, which takes one arg, name, and returns a String.
 #[tarpc::service]
 pub trait P2PService {
     async fn addr(request: P2PMap) -> P2PMap;
@@ -28,21 +26,30 @@ pub trait P2PService {
     async fn verack(request: P2PMap) -> P2PMap;
 }
 
-/// Initializes an OpenTelemetry tracing subscriber with a Jaeger backend.
-pub fn init_tracing(service_name: &str) -> anyhow::Result<()> {
-    env::set_var("OTEL_BSP_MAX_EXPORT_BATCH_SIZE", "12");
-
-    let tracer = opentelemetry_jaeger::new_pipeline()
-        .with_service_name(service_name)
-        .with_max_packet_size(2usize.pow(13))
-        .install_batch(opentelemetry::runtime::Tokio)?;
-
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::EnvFilter::from_default_env())
-        .with(tracing_subscriber::fmt::layer().with_span_events(FmtSpan::NEW | FmtSpan::CLOSE))
-        .with(tracing_opentelemetry::layer().with_tracer(tracer))
-        .try_init()?;
-
-    Ok(())
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct P2PVersionRequest {
+    #[serde(default)]
+    pub version: i32,
+    #[serde(default)]
+    pub services: u64,
+    #[serde(default)]
+    pub time: u64,
+    #[serde(default)]
+    pub addr_me: String,
+    #[serde(default)]
+    pub addr_from: String,
+    #[serde(default)]
+    pub nonce: u64,
+    #[serde(default)]
+    pub sub_version: String,
+    #[serde(default)]
+    pub height: u64,
 }
 
+impl P2PVersionRequest {
+    pub fn from(map: P2PMap) -> P2PVersionRequest {
+        let cbor_raw = to_vec(&map).unwrap();
+        let request: P2PVersionRequest = from_slice(&cbor_raw).unwrap();
+        request
+    }
+}

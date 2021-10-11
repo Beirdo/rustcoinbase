@@ -2,6 +2,9 @@ use log::*;
 use sled;
 use serde_json::*;
 use std::path::Path;
+use serde_derive::{Serialize, Deserialize};
+use std::net::SocketAddr;
+use std::fmt;
 
 #[derive(Clone)]
 pub struct PeerDatabase {
@@ -20,14 +23,34 @@ pub fn init_peer_db(data_dir: String) -> sled::Result<PeerDatabase> {
 }
 
 impl PeerDatabase {
-    pub fn write(&mut self, key: &str, value: PeerDBValue) -> sled::Result<()> {
+    pub fn write_raw(&mut self, key: &str, value: PeerDBValue) -> sled::Result<()> {
 	// value comes in as a JSON Value.  Convert to string, then to bytes
         let value = sled::IVec::from(value.to_string().as_bytes());
         self.db.insert(String::from(key), value)?;
         Ok(())
     }
 
-    fn convert_value(in_value: Option<sled::IVec>) -> sled::Result<PeerDBValue> {
+    pub fn write(&mut self, key: &str, value: PeerDBRecord) -> sled::Result<()> {
+	// value comes in as a JSON Value.  Convert to string, then to bytes
+        let value = sled::IVec::from(value.to_string().as_bytes());
+        self.db.insert(String::from(key), value)?;
+        Ok(())
+    }
+
+    fn convert_value(in_value: Option<sled::IVec>) -> sled::Result<PeerDBRecord> {
+	// Value comes back as bytes, unravel to a JSON string, then back to
+        // JSON value
+
+	// Make it an vec with default that maps to {}
+        let value = in_value.unwrap_or(sled::IVec::from(vec![173, 175])).to_vec();
+        // convert that to a UTF8 string
+        let value = String::from_utf8(value).unwrap_or(String::from("{}"));
+        // and finally from a String back to a JSON Value
+        let value: PeerDBRecord = from_str(&value).unwrap();
+        Ok(value)
+    }
+
+    fn convert_value_raw(in_value: Option<sled::IVec>) -> sled::Result<PeerDBValue> {
 	// Value comes back as bytes, unravel to a JSON string, then back to
         // JSON value
 
@@ -40,7 +63,12 @@ impl PeerDatabase {
         Ok(value)
     }
 
-    pub fn read(&mut self, key: &str) -> sled::Result<PeerDBValue> {
+    pub fn read_raw(&mut self, key: &str) -> sled::Result<PeerDBValue> {
+        let value = self.db.get(String::from(key))?;
+        PeerDatabase::convert_value_raw(value)
+    }
+
+    pub fn read(&mut self, key: &str) -> sled::Result<PeerDBRecord> {
         let value = self.db.get(String::from(key))?;
         PeerDatabase::convert_value(value)
     }
@@ -49,8 +77,73 @@ impl PeerDatabase {
         self.db.contains_key(String::from(key))
     }
 
-    pub fn remove(&mut self, key: &str) -> sled::Result<PeerDBValue> {
+    pub fn remove(&mut self, key: &str) -> sled::Result<PeerDBRecord> {
         let value = self.db.remove(String::from(key))?;
         PeerDatabase::convert_value(value)
     }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MySocketAddr(SocketAddr);
+impl Default for MySocketAddr {
+    fn default() -> Self {
+        MySocketAddr(SocketAddr::new("0.0.0.0".parse().unwrap(), 0))
+    }
+}
+
+impl fmt::Display for MySocketAddr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PeerDBRecord {
+    #[serde(default)]
+    pub services: u64,
+    #[serde(default)]
+    pub last_send: i64,
+    #[serde(default)]
+    pub last_recv: i64,
+    #[serde(default)]
+    pub last_send_empty: i64,
+    #[serde(default)]
+    pub time_connected: i64,
+    #[serde(default)]
+    pub addr_remote: MySocketAddr,
+    #[serde(default)]
+    pub addr_name: String,
+    #[serde(default)]
+    pub addr_local: MySocketAddr,
+    #[serde(default)]
+    pub version: i32,
+    #[serde(default)]
+    pub sub_version: String,
+    #[serde(default)]
+    pub height: u64,
+    #[serde(default)]
+    pub one_shot: bool,
+    #[serde(default)]
+    pub client: bool,
+    #[serde(default)]
+    pub inbound: bool,
+    #[serde(default)]
+    pub network_node: bool,
+    #[serde(default)]
+    pub successfully_connected: bool,
+    #[serde(default)]
+    pub disconnect: bool,
+    #[serde(default)]
+    pub grant_outbound: bool,
+    #[serde(default)]
+    pub ref_count: i32,
+    #[serde(default)]
+    pub misbehaving: i32,
+}
+
+impl fmt::Display for PeerDBRecord {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
