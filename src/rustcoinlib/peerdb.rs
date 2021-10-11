@@ -1,5 +1,6 @@
 use sled;
 use serde_json::*;
+use std::path::Path;
 
 #[derive(Clone)]
 pub struct PeerDatabase {
@@ -8,8 +9,9 @@ pub struct PeerDatabase {
 
 pub type PeerDBValue = Value;
 
-pub fn init_peer_db() -> sled::Result<PeerDatabase> {
-    let path = "/tmp/peerdb.sled";
+pub fn init_peer_db(data_dir: String) -> sled::Result<PeerDatabase> {
+    let path: String = String::from(Path::new(&data_dir).join("peerdb").to_str().unwrap());
+    println!("{}", path);
 
     let db = sled::open(path)?;
 

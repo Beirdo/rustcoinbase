@@ -1,7 +1,7 @@
-use clap::Clap;
 use futures::{future, prelude::*};
 use rustcoinbase::rustcoinlib::p2pservice::*;
 use rustcoinbase::rustcoinlib::peerdb::*;
+use rustcoinbase::rustcoinlib::settings::*;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use tarpc::{
     context,
@@ -10,13 +10,6 @@ use tarpc::{
 use tokio_serde::formats::*;
 use serde_cbor::Value;
 use serde_json;
-
-#[derive(Clap)]
-struct Flags {
-    /// Sets the port number to listen on.
-    #[clap(long)]
-    port: u16,
-}
 
 #[derive(Clone)]
 struct P2PServer(SocketAddr, PeerDatabase);
@@ -186,11 +179,10 @@ impl P2PService for P2PServer {
 }
 
 #[tokio::main]
-pub async fn start_p2pserver(peerdb: PeerDatabase) -> anyhow::Result<()> {
-    let flags = Flags::parse();
-    init_tracing("Tarpc Example Server")?;
-
-    let server_addr = (IpAddr::V4(Ipv4Addr::LOCALHOST), flags.port);
+pub async fn start_p2pserver(settings: &Settings, peerdb: PeerDatabase) -> anyhow::Result<()> {
+    let server_ip = settings.p2p.bind;
+    let server_port = settings.p2p.port;
+    let server_addr = (server_ip, server_port);
     tracing::info!("{:?}", server_addr);
     println!("Starting P2P Service at {:?}", server_addr);
 

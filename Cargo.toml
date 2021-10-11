@@ -8,6 +8,8 @@ license = "MIT"
 [dependencies]
 anyhow = "1.0"
 clap = "3.0.0-beta.4"
+config = "0.11"
+directories = "4.0"
 futures = "0.3"
 log = "0.4"
 opentelemetry-jaeger = { version = "0.15", features = ["rt-tokio"] }
@@ -17,7 +19,7 @@ serde_cbor = "0.11"
 serde_derive = { version = "1.0", default-features = false }
 serde_json = "1.0"
 serde = { version = "1.0", default-features = false }
-sled = "0.34"
+sled = { version = "0.34", features = ["compression"] }
 tarpc = { version = "0.27", features = ["full"] }
 tokio-serde = { version = "0.8", features = ["json", "cbor"] }
 tokio = { version = "1", features = ["macros", "net", "rt-multi-thread"] }
