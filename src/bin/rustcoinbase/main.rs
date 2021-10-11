@@ -1,7 +1,8 @@
-use log::*;
+#[macro_use] extern crate log;
+// use log::*;
 use simplelog::*;
 use std::thread;
-use std::fs::File;
+use std::fs::OpenOptions;
 use std::sync::mpsc;
 
 use rustcoinbase::rustcoinlib::peerdb::*;
@@ -21,14 +22,24 @@ fn main() {
     CombinedLogger::init(vec![
         TermLogger::new(
             LevelFilter::Info,
-            Config::default(),
+            ConfigBuilder::new()
+                .set_thread_level(LevelFilter::Debug)
+                .set_target_level(LevelFilter::Debug)
+                .set_location_level(LevelFilter::Debug)
+                .set_thread_mode(ThreadLogMode::Both)
+                .build(),
             TerminalMode::Mixed,
             ColorChoice::Auto,
         ),
         WriteLogger::new(
             LevelFilter::Info,
-            Config::default(),
-            File::create(log_file).unwrap(),
+            ConfigBuilder::new()
+                .set_thread_level(LevelFilter::Debug)
+                .set_target_level(LevelFilter::Debug)
+                .set_location_level(LevelFilter::Debug)
+                .set_thread_mode(ThreadLogMode::Both)
+                .build(),
+            OpenOptions::new().append(true).open(log_file).unwrap(),
         ),
     ]).unwrap();
 
