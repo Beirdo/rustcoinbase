@@ -3,8 +3,9 @@ use sled;
 use serde_json::*;
 use std::path::Path;
 use serde_derive::{Serialize, Deserialize};
-use std::net::SocketAddr;
+use std::net::{SocketAddr, IpAddr};
 use std::fmt;
+use cidr::Ipv4Cidr;
 
 #[derive(Clone)]
 pub struct PeerDatabase {
@@ -84,7 +85,7 @@ impl PeerDatabase {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct MySocketAddr(SocketAddr);
+pub struct MySocketAddr(pub SocketAddr);
 impl Default for MySocketAddr {
     fn default() -> Self {
         MySocketAddr(SocketAddr::new("0.0.0.0".parse().unwrap(), 0))
@@ -94,6 +95,40 @@ impl Default for MySocketAddr {
 impl fmt::Display for MySocketAddr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
+    }
+}
+
+impl MySocketAddr {
+    pub fn is_routable(&self) -> bool {
+        let ip = (*self).0.ip();
+        info!("IP: {:?}", ip);
+
+        match ip {
+            IpAddr::V4(ipv4) => {
+                /* handle IPv4 */
+	        let bad_cidrs = [
+                    Ipv4Cidr::new("0.0.0.0".parse().unwrap(), 0),
+                    Ipv4Cidr::new("255.255.255.255".parse().unwrap(), 32), 
+                    // !RFC1918 - 10/8, 172.16/12, 192.168/16
+                    Ipv4Cidr::new("10.0.0.0".parse().unwrap(), 8),
+                    Ipv4Cidr::new("172.16.0.0".parse().unwrap(), 12),
+                    Ipv4Cidr::new("192.168.0.0".parse().unwrap(), 16),
+                    // !RFC3927 - 169.254/16
+                    Ipv4Cidr::new("169.254.0.0".parse().unwrap(), 16),
+                    // !Local - 127/8
+                    Ipv4Cidr::new("127.0.0.0".parse().unwrap(), 8),
+                ];
+
+                for bad_block in bad_cidrs {
+                    if bad_block.unwrap().contains(&ipv4) {
+                        return false;
+                    }
+                }
+            }
+            IpAddr::V6(_ipv6) => { return false; }
+        }
+
+        true
     }
 }
 

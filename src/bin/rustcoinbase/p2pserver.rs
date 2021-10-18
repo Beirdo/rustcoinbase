@@ -3,7 +3,9 @@ use futures::{future, prelude::*};
 use rustcoinbase::rustcoinlib::p2pservice::*;
 use rustcoinbase::rustcoinlib::peerdb::*;
 use rustcoinbase::rustcoinlib::settings::*;
-use std::net::SocketAddr;
+use rustcoinbase::rustcoinlib::constants::*;
+use rustcoinbase::rustcoinlib::localaddress::*;
+use std::net::{SocketAddr, IpAddr};
 use tarpc::{
     context,
     server::{self, incoming::Incoming, Channel},
@@ -13,14 +15,19 @@ use serde_cbor::Value;
 use serde_json;
 
 #[derive(Clone)]
-struct P2PServer(SocketAddr, PeerDatabase);
+struct P2PServer(SocketAddr, SocketAddr, PeerDatabase, Statics, LocalAddressMap);
 
 #[tarpc::server]
 impl P2PService for P2PServer {
     async fn addr(self, _: context::Context, request: P2PMap) -> P2PMap {
         let message = format!("addr request: {:?} from {}", request, self.0);
-        let mut peerdb = self.1;
-        let key = String::from(self.0.to_string());
+
+        let remote_addr = self.0;
+        let _my_addr = self.1;
+        let mut peerdb = self.2;
+        let _constants = self.3;
+        let key = String::from(remote_addr.to_string());
+
         let value: PeerDBValue = serde_json::json!({
             "test": "blah"
         });
@@ -166,9 +173,15 @@ impl P2PService for P2PServer {
         let request: P2PVersionRequest = P2PVersionRequest::from(request);
         info!("{:?}", request);
 
-        let mut peerdb = self.1;
-        let key = String::from(self.0.to_string());
+        let remote_addr = self.0;
+        let my_addr = self.1;
+        let mut peerdb = self.2;
+        let constants = self.3;
+        let mut localaddress = self.4;
+
+        let key = String::from(remote_addr.to_string());
         let mut peer = peerdb.read(&key).expect("Couldn't read back from db");
+
         info!("{:?}", peer);
 
         let mut response = P2PMap::new();
@@ -180,21 +193,31 @@ impl P2PService for P2PServer {
 
 	peer.version = request.version;
         peer.services = request.services;
-        let time = request.time;
-        let addr_me = request.addr_me;
+        peer.addr_remote = MySocketAddr(remote_addr);
+
+        let _time = request.time;
+        let addr_me: IpAddr = request.addr_me.parse().unwrap();
+        let sa = MySocketAddr(SocketAddr::new(addr_me, my_addr.port()));
+
+        if peer.inbound && sa.is_routable() {
+            peer.addr_local = sa.clone();
+            if localaddress.increment(&sa) {
+                // Readvertise with new values
+            }
+        }
 
         info!("Peer: {:?}", peer);
 
-	if peer.version < 1000 {
-            error!("Peer {:?} using obsolete version {}; disconnecting", self.0, peer.version);
+	if peer.version < constants.min_peer_proto_version {
+            error!("Peer {:?} using obsolete version {}; disconnecting", remote_addr, peer.version);
             peer.disconnect = true;
             peerdb.write(&key, peer).unwrap();
             return response;
         }
 
         let nonce = request.nonce;
-        if nonce == 1000 && nonce > 1 {
-            error!("Connected to self at {}, disconnecting", self.0);
+        if nonce == constants.local_host_nonce {
+            error!("Connected to self from {}, disconnecting", remote_addr);
             peer.disconnect = true;
             return response;
         }
@@ -215,7 +238,9 @@ impl P2PService for P2PServer {
 }
 
 #[tokio::main]
-pub async fn start_p2pserver(settings: &Settings, peerdb: PeerDatabase) -> anyhow::Result<()> {
+pub async fn start_p2pserver(settings: &Settings, peerdb: PeerDatabase, localaddresses: &LocalAddressMap ) -> anyhow::Result<()> {
+    let constants: Statics = Statics::new();
+    let mut local_addr_map = localaddresses;
     let server_ip = settings.p2p.bind;
     let server_port = settings.p2p.port;
     let server_addr = (server_ip, server_port);
@@ -235,7 +260,9 @@ pub async fn start_p2pserver(settings: &Settings, peerdb: PeerDatabase) -> anyho
         // the generated World trait.
         .map(|channel| {
             let server = P2PServer(channel.transport().peer_addr().unwrap(),
-                                   peerdb.clone());
+                                   channel.transport().local_addr().unwrap(),
+                                   peerdb.clone(), constants.clone(),
+                                   local_addr_map.clone());
             channel.execute(server.serve())
         })
         // Max 10 channels.
